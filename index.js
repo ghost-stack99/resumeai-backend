@@ -161,7 +161,7 @@ async function generatePDF(text,token,username) {
       <body>
         <div class="header">
           <img src="data:image/png;base64,${
-            readFileSync('./asset/header.png').toString('base64')
+            readFileSync('./assets/header.png').toString('base64')
           }" style="width: 100%;">
         </div>
         <div class="content">
@@ -170,7 +170,7 @@ async function generatePDF(text,token,username) {
         </div>
         <div class="footer">
           <img src="data:image/png;base64,${
-            readFileSync('./asset/footer.png').toString('base64')
+            readFileSync('./assets/footer.png').toString('base64')
           }"  style="width: 100%;">
         </div>
       </body>
