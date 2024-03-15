@@ -3,22 +3,22 @@ const express = require('express');
 const multer = require('multer');
 const pdfParse = require('pdf-parse');
 const { createReadStream } = require('fs');
-// const { PDFDocument, rgb } = require('pdf-lib');
 const OpenAI = require( "openai");
 const openai = new OpenAI({apiKey : "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"})
 const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
 const puppeteer = require('puppeteer');
 const { readFileSync } = require('fs');
 const crypto = require('crypto');
-
+const serverless = require('serverless-http')
+const router = express.Router()
 
 
 // Initialize Express app
 const app = express();
 const port = process.env.PORT || 3410; 
 app.use(cors());
+// app.use('/.netlify/functions/api',router);
+
 
 
 // Initialize Multer for file upload and report
@@ -35,6 +35,9 @@ const upload = multer({ dest: 'uploads/' });
 
 
 // Serve static files
+app.get('/',(req,res)=>{
+  res.send("app is running")
+})
 app.use(express());
 // generatePDF("rfrfvf")
 
@@ -56,7 +59,7 @@ app.post('/upload', upload.single('resume'), async (req, res) => {
 
         // Await the generatePDF function
         await generatePDF(analysis, token, name);
-        await app.get('/reports/:fileName', (req, res) => {
+        app.get('/reports/:fileName', (req, res) => {
           const fileName = req.params.fileName;
           const file = `./reports/${fileName}.pdf`;
         
@@ -187,5 +190,5 @@ async function generatePDF(text,token,username) {
 
 
 //GET Requests
-
+module.exports.handler = serverless(app);
 
