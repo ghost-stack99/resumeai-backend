@@ -4,13 +4,12 @@ const multer = require('multer');
 const pdfParse = require('pdf-parse');
 const { createReadStream } = require('fs');
 const OpenAI = require( "openai");
-const openai = new OpenAI({apiKey : "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"})
+const openai = new OpenAI({apiKey : "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"})
 const cors = require('cors');
 const puppeteer = require('puppeteer');
 const { readFileSync } = require('fs');
 const crypto = require('crypto');
 const serverless = require('serverless-http')
-const router = express.Router()
 
 
 // Initialize Express app
