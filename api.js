@@ -4,7 +4,9 @@ const multer = require('multer');
 const pdfParse = require('pdf-parse');
 const { createReadStream } = require('fs');
 const OpenAI = require( "openai");
-const openai = new OpenAI()
+require('dotenv').config();
+console.log(process.env.API_KEY)
+const openAI = new OpenAI({ apiKey: process.env.API_KEY })
 const cors = require('cors');
 const puppeteer = require('puppeteer');
 const { readFileSync } = require('fs');
@@ -38,7 +40,6 @@ app.get('/',(req,res)=>{
   res.send("app is running")
 })
 app.use(express());
-// generatePDF("rfrfvf")
 
 // Define route for file upload
 app.post('/upload', upload.single('resume'), async (req, res) => {
@@ -55,6 +56,7 @@ app.post('/upload', upload.single('resume'), async (req, res) => {
         const token = name + "-" + crypto.randomBytes(2).toString("hex") + "-Report-By-EDEC";
         const resumeText = await extractText(req.file.path);
         const analysis = await analyzeResume(resumeText , job);
+        console.log(analysis)
 
         // Await the generatePDF function
         await generatePDF(analysis, token, name);
@@ -98,18 +100,24 @@ async function extractText(filePath) {
 
 
 // Function to analyze resume using GPT-3.5
+// Assuming you have already set up your OpenAI API key and imported necessary libraries
+// Function to analyze resume using GPT-3.5
 async function analyzeResume(resumeText,job) {
-    // Use OpenAI API to analyze the resume text
+  // Use OpenAI API to analyze the resume text
 
-    const completion = await openai.chat.completions.create({
-        messages: [{ role: "system", content: "You are an Human Resource Professional an HR proffesional analyse the resume,"+resumeText+" give a rating out of 10 for each of the following criteria Relevance to the Job out of 10 , Education out of 10, Work Experience out of 10, Skills out of 10, Achievements and Accomplishments out of 10, Keywords out of 10, Format and Layout out of 10, Relevant Extracurricular Activities or Volunteer Work out of 10, Professionalism out of 10, References out of 10, Customization out of 10, Overall Impression  out of 10 , and explain their areas of improvement and defficiency , "+"likelihood of the resume to be considered for a job as "+job+" on the scale of 100 percent ,"+" and then give an overall score to the resume considering appropriate weightage to the criteria PLEASE GIVE RESPONSE IN HTML inside body markup with proper spacing and line with inline for the arrangement of each criteria inside a div without headings " }],
-        model: "gpt-3.5-turbo",
-      });
-    
-      console.log(completion.choices[0].message.content);
+  const completion = await openAI.chat.completions.create({
+      messages: messages = [
+        { role: 'system', content: 'You are an HR Professional, skilled in analyzing CVs and Resumes. Use html <p> tags to seperate different aspects and paragraph' },
+        { role: 'user', content: `Analyze the resume:\n${resumeText}\n Provide suggestions on how to improve their resume on the criteria Proffesional Summary , Objectives , Work Experience , Education and Specific and Pertinent Skills and at last rate their suitability for a job of ${job} and give a final summary` },
+      ],
+      model: "gpt-3.5-turbo",
+    });
+  
+    console.log(completion.choices[0].message.content);
 
-    return completion.choices[0].message.content;
+  return completion.choices[0].message.content;
 }
+
 
 // Start the server
 app.listen(port, () => {
@@ -158,6 +166,14 @@ async function generatePDF(text,token,username) {
           .footer {
             width: 100%;
           }
+
+          .content > p {
+            font-family: Arial, sans-serif; /* Replace with the font used in ChatGPT */
+            font-size: 16px; /* Adjust font size as needed */
+            color: #333; /* Dark greyish font color */
+            padding: 10px; /* Adjust padding as needed */
+            margin: 10px 0; /* Adjust margin as needed */
+          }
         </style>
       </head>
       <body>
@@ -168,7 +184,7 @@ async function generatePDF(text,token,username) {
         </div>
         <div class="content">
           <h1 class="heading" style="text-align: center; text-decoration: underline;" >Resume Analysis for ${username}</h1>
-          <div style="padding: 20px;">${text}</div>
+          <div class="content" style="padding: 20px;">${text}</div>
         </div>
         <div class="footer">
           <img src="data:image/png;base64,${
@@ -190,4 +206,6 @@ async function generatePDF(text,token,username) {
 
 //GET Requests
 module.exports.handler = serverless(app);
+
+
 
